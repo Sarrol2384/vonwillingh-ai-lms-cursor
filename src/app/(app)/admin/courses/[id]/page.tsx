@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CourseForm } from "@/components/course-form";
 import { ModuleList } from "@/components/module-list";
+import { CoursePreviewModal } from "@/components/course-preview-modal";
 import { ArrowLeft } from "lucide-react";
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,9 +36,16 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
           Back to courses
         </Button>
       </Link>
-      <div>
-        <h1 className="text-2xl font-bold">Edit course</h1>
-        <p className="text-muted-foreground">{course.code}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Edit course</h1>
+          <p className="text-muted-foreground">{course.code}</p>
+        </div>
+        <CoursePreviewModal
+          courseId={id}
+          courseTitle={course.title}
+          courseCode={course.code}
+        />
       </div>
       <CourseForm course={course} createdBy={profile.id} />
       <Card>
