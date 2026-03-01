@@ -2,8 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 interface GeneratedUnit {
   title: string;
   content: string;
@@ -30,6 +28,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: "ANTHROPIC_API_KEY is not set in environment variables" }, { status: 500 });
+  }
+
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const body = await request.json();
   const { courseTitle, nqfLevel, numModules } = body as {
     courseTitle: string;
