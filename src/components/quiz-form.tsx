@@ -13,7 +13,7 @@ interface QuizFormProps {
   assessmentId: string;
   moduleId: string;
   enrollmentId: string;
-  questions: { question: string; options: string[]; correctIndex: number }[];
+  questions: { question: string; options: string[] }[];
 }
 
 export function QuizForm({ assessmentId, moduleId, enrollmentId, questions }: QuizFormProps) {

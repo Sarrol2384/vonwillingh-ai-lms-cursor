@@ -25,7 +25,8 @@ export default async function QuizPage({
   if (!assessment) notFound();
 
   const config = assessment.config as { questions?: { question: string; options: string[]; correctIndex: number }[] };
-  const questions = config?.questions ?? [];
+  // Strip correctIndex before sending to client — answers are only checked server-side
+  const questions = (config?.questions ?? []).map(({ question, options }) => ({ question, options }));
 
   const { data: existing } = await supabase
     .from("submissions")
