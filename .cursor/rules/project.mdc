@@ -1,0 +1,21 @@
+---
+alwaysApply: true
+---
+## Project
+Small university LMS for testing - VonWillingh-AI-LMS
+
+## Tech Stack
+- Next.js 14 (App Router)
+- TypeScript
+- Supabase (auth, database, storage)
+- Tailwind CSS
+- Shadcn/ui components
+
+## Rules
+- Use TypeScript only
+- Keep it simple but functional
+- Handle errors gracefully
+- Mobile responsive
+- South African context
+- Sequential module unlock (pass to proceed)
+- Pass mark 50%
