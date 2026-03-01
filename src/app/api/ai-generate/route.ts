@@ -2,6 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
+interface GeneratedQuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+}
 interface GeneratedUnit {
   title: string;
   content: string;
@@ -11,6 +16,8 @@ interface GeneratedModule {
   title: string;
   description: string;
   units: GeneratedUnit[];
+  quiz_questions: GeneratedQuizQuestion[];
+  assignment_instructions: string;
 }
 interface GeneratedCourse {
   title: string;
@@ -64,13 +71,24 @@ Generate the course structure as valid JSON with this exact shape:
           "content": "string (2-3 paragraphs of educational content)",
           "video_topic": "string (optional YouTube search topic)"
         }
-      ]
+      ],
+      "quiz_questions": [
+        {
+          "question": "string",
+          "options": ["option A", "option B", "option C", "option D"],
+          "correctIndex": 0
+        }
+      ],
+      "assignment_instructions": "string (clear assignment task description, 2-3 sentences)"
     }
   ]
 }
 
 Requirements:
 - Each module must have 2-3 units
+- Each module must have exactly 5 quiz questions, each with 4 options
+- correctIndex is 0-based (0=A, 1=B, 2=C, 3=D)
+- Assignment instructions must be practical and relevant to the module content
 - Content must be appropriate for NQF level ${nqfLevel}
 - Use South African context where relevant
 - Output only valid JSON, no extra text`;
@@ -88,7 +106,7 @@ Requirements:
 
     const generated: GeneratedCourse = JSON.parse(jsonMatch[0]);
 
-    // Save to database
+    // Save course
     const { data: course, error: courseError } = await supabase
       .from("courses")
       .insert({
@@ -116,6 +134,7 @@ Requirements:
         .single();
       if (modError) continue;
 
+      // Save units
       for (let ui = 0; ui < mod.units.length; ui++) {
         const unit = mod.units[ui];
         await supabase.from("units").insert({
@@ -126,6 +145,29 @@ Requirements:
             ? `https://www.youtube.com/results?search_query=${encodeURIComponent(unit.video_topic)}`
             : null,
           sequence_order: ui,
+        });
+      }
+
+      // Save quiz
+      if (mod.quiz_questions?.length > 0) {
+        await supabase.from("assessments").insert({
+          module_id: module.id,
+          type: "quiz",
+          title: `${mod.title} Quiz`,
+          config: { questions: mod.quiz_questions },
+        });
+      }
+
+      // Save assignment
+      if (mod.assignment_instructions) {
+        await supabase.from("assessments").insert({
+          module_id: module.id,
+          type: "assignment",
+          title: `${mod.title} Assignment`,
+          config: {
+            instructions: mod.assignment_instructions,
+            max_score: 100,
+          },
         });
       }
     }
