@@ -1,14 +1,24 @@
-const FROM = process.env.EMAIL_FROM ?? "VonWillingh LMS <no-reply@vonwillingh.ac.za>";
+const FROM_NAME = "VonWillingh LMS";
+const FROM_EMAIL = process.env.EMAIL_FROM ?? "no-reply@vonwillingh.ac.za";
 
 async function sendEmail(to: string, subject: string, text: string) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!process.env.BREVO_API_KEY || !to) return;
   try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({ from: FROM, to, subject, text });
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: FROM_NAME, email: FROM_EMAIL },
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+      }),
+    });
   } catch {
-    // Non-fatal — log but don't throw
-    console.error("Email send failed");
+    console.error("Brevo email send failed");
   }
 }
 
