@@ -86,7 +86,7 @@ Generate the course structure as valid JSON with this exact shape:
 
 Requirements:
 - Each module must have 2-3 units
-- Each module must have exactly 5 quiz questions, each with 4 options
+- Each module must have exactly 20 quiz questions, each with 4 options
 - correctIndex is 0-based (0=A, 1=B, 2=C, 3=D)
 - Assignment instructions must be practical and relevant to the module content
 - Content must be appropriate for NQF level ${nqfLevel}
@@ -96,7 +96,7 @@ Requirements:
   try {
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 8192,
+      max_tokens: 16000,
       messages: [{ role: "user", content: prompt }],
     });
 
