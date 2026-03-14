@@ -47,6 +47,19 @@ export function RegistrationForm({ profile, courses }: RegistrationFormProps) {
     setLoading(true);
     try {
       const supabase = createClient();
+      // Save application details (phone, ID number) to profile so admins can see them
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          id_number: idNumber.trim() || null,
+          phone: phone.trim() || null,
+        })
+        .eq("id", profile.id);
+      if (profileError) {
+        toast.error(profileError.message);
+        setLoading(false);
+        return;
+      }
       const ext = file.name.split(".").pop() ?? "pdf";
       const path = `proofs/${profile.id}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
